@@ -12,6 +12,9 @@ approach:
 3) Implementation of Shortest Job First (SJF)
 4) Implementation of Fixed Order (B,C,D,E,A)
 
+key terms:
+SJF: Shortest Job First
+AWT/awt: Average Wait Time
 '''''
 
 #This section aims to get the user's input and output the result
@@ -19,20 +22,36 @@ approach:
 def main():
     print("Welcome to the Batch Scheduling Program Assignment!")
     print("This program will calculate average wait times for different scheduling algorithms(Shortest Job First, Defined Order, Randomized Order)")
+    #adding the ability for users to be able to correct their input incase there is an error
     try:
         numberOfJobs = int(input("Please enter the number of jobs to be executed: "))
         
         jobs = [] #an array to store the jobs
 
-
+    
         #Getting the job details... e.g: name of the job,runtimes, and arrival time
 
         for num in range(numberOfJobs):
-            jobName = input(" Enter the job name for job : ")
-            jobRunTime = int(input(f" Enter runtime for job {jobName}: "))
-            jobArrivalTime = int(input(f" Enter the arrival time for job {jobName}: "))
-            jobs.append({"name": jobName, "runtime": jobRunTime, "arrival": jobArrivalTime})
+            job_confirmation =False
+            while not job_confirmation:
+                try:
+        
+                    jobName = input(" Enter the job name for job : ")
+                    jobRunTime = int(input(f" Enter runtime for job {jobName}: "))
+                    jobArrivalTime = int(input(f" Enter the arrival time for job {jobName}: "))
 
+                    print(f"\nYou entered: Job Name: {jobName}, Runtime: {jobRunTime}, Arrival Time: {jobArrivalTime}")
+                    confirm = input("Is this information correct? (Yes/No): ").lower()
+                    
+                    if confirm =="yes":
+                        jobs.append({"name": jobName, "runtime": jobRunTime, "arrival": jobArrivalTime})
+                        job_confirmation = True
+
+                    else: 
+                        print("Please re-enter the job details carefully.")
+                
+                except ValueError:
+                    print("Your input is invalid. Please enter a valid number for runtime and arrival time.")
         
         '''
         Output: Running program should display 
