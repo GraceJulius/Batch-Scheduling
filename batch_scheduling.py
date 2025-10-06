@@ -18,7 +18,8 @@ AWT/awt: Average Wait Time
 '''''
 
 #This section aims to get the user's input and output the result
-
+#going to use a copy so as to prevent working on the main input so I don't affect other calculations
+import copy
 def main():
     print("Welcome to the Batch Scheduling Program Assignment!")
     print("This program will calculate average wait times for different scheduling algorithms(Shortest Job First, Defined Order, Randomized Order)")
@@ -52,6 +53,9 @@ def main():
                 
                 except ValueError:
                     print("Your input is invalid. Please enter a valid number for runtime and arrival time.")
+        if len(jobs) != numberOfJobs or numberOfJobs == 0:
+            print("Job input was incomplete or empty")
+            return
         
         '''
         Output: Running program should display 
@@ -63,15 +67,23 @@ def main():
         print(f"\nAverage wait time for the Shortest Job First: {SJF_AWT:.2f}")
 
         #Defined Order
-        definedOrder_AWT = definedOrder(jobs)
-        print(f"Average wait time for the defined order (B,C,D,E,A) : {definedOrder_AWT:.2f}")
-
+        #made some updates here
+        if numberOfJobs == 5 and all(job['name'] in ['A', 'B', 'C', 'D', 'E'] for job in jobs):
+            definedOrder_AWT = definedOrder(jobs)
+            print(f"Average wait time for the defined order (B,C,D,E,A) : {definedOrder_AWT:.2f}")
+        else:
+            print("\nSkipping Defined Order (B,C,D,E,A) calculation as input jobs do not match the expected 5 jobs (A, B, C, D, E).")
+        
         #RandomOrder
         randomOder_AWT = randomApproach(jobs)
         print(f"\nAverage wait time for a random order: {randomOder_AWT:.2f}")
 
     except ValueError:
         print("Invalid input. Please enter a valid number.")
+    except KeyError as e:
+        print(f"Error: Could not find job name {e} needed for the defined order calculation. Ensure you entered jobs A, B, C, D, and E.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
 
@@ -94,15 +106,14 @@ def awt(jobs):
         runtime = job['runtime']
 
 
-        #checks if CPU is idle before a new job arrive, if so, time = arrival
-        if currentTime < arrivalTime:
-            currentTime = arrivalTime
+        #start time = max of current time and arrival time
+        jobStartTime = max(currentTime, arrivalTime)
+        # wait time = start time - arrival time
 
-        # wait time = current time - arrival time
-
-        waitTime = currentTime - arrivalTime
+        waitTime = jobStartTime - arrivalTime
         totalWaitTime += waitTime
-        currentTime += runtime
+        #updates current time to job's completion time
+        currentTime = jobStartTime + runtime
 
     averageWaitTime = totalWaitTime / len(jobs)
     return averageWaitTime
@@ -117,10 +128,51 @@ def awt(jobs):
 
 def SJF(jobs):
 
+    #create a copy of the job
+    jobsCopy = copy.deepcopy(jobs)
     #sorting the jobs by arrival time since we need to start from the shortest
+    #after some research and external assistant from google and perplexity and chatgpt, I realized I did not create a copy which made get wrong answers
+    # as I was working on the original input
+    
+    jobsCopy.sort(key=lambda x: (x['arrival'], x['runtime']))
+    currentTime = 0
+    totalWaitTIme = 0
+    #readyQueue: keeps jobs that have arrived and are waiting
+    readyQueue = []
+    
+    #jobsLeft: jobs that have not arrived
+    jobsLeft = jobsCopy[:]
+    numJobs = len(jobs)
 
-    sortedJobs = sorted(jobs, key=lambda x: x['runtime'])
-    return awt(sortedJobs)
+    #looping till every job is processed
+    while jobsLeft or readyQueue:
+        i = 0
+        while i < len(jobsLeft) and jobsLeft[i]['arrival'] <= currentTime:
+            readyQueue.append(jobsLeft.pop(i))
+        if not readyQueue:
+            if jobsLeft:
+                currentTime = jobsLeft[0]['arrival']
+                continue
+            else:
+                break
+        
+        #SJF selection
+        readyQueue.sort(key=lambda x: x['runtime'])
+        jobsToRun = readyQueue.pop(0)
+
+        jobStartTime = currentTime
+
+        #waitTime
+        waitTime = jobStartTime - jobsToRun['arrival']
+        totalWaitTIme+= waitTime
+
+        currentTime += jobsToRun['runtime']
+
+    #fianl calculation
+    averageWaitTime = totalWaitTIme/numJobs
+    return averageWaitTime
+        
+    #return awt(sortedJobs)
 
 #b) function to implement average wait time by running them in a defined order (BCDEA)
 
