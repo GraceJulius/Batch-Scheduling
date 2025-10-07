@@ -122,8 +122,8 @@ This assignment will calculate average wait times
 for different scheduling algorithms(Shortest Job First, Defined Order, Randomized Order)
 
 Please enter the number of jobs to be executed: 
-Average wait time for the Shortest Job First: 6.20
-Average wait time for the defined order (B,C,D,E,A): 4.60
+Average wait time for the Shortest Job First: 3.60
+Average wait time for the defined order (B,C,D,E,A): 3.40
 Randomized order of jobs: ['E', 'A', 'C', 'D', 'B']
 Average wait time for a random order: 3.40
 
